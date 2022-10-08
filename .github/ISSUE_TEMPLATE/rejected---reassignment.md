@@ -2,7 +2,7 @@
 name: Rejected & Reassignment
 about: Rejected Tasks
 title: ''
-labels: Invalid, Mandatory
+labels: Mandatory, Rejected
 assignees: ''
 
 ---

@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-## 🚧Rejection From : (QA / Review Team)
+## 🚧Rejection From : (QA / Review Team / Team Leader)
 ## ⛔Rejection Reason
 Briefly Describe the problem
 

@@ -1,13 +1,19 @@
 ---
 name: Rejected & Reassignment
 about: Rejected Tasks
-title: ''
+title: "\U0001F6A7 Rejected : Task Title"
 labels: Mandatory, Rejected
 assignees: ''
 
 ---
 
-## Task Title
+## 🚧Rejection From : (QA / Review Team)
+## ⛔Rejection Reason
+Briefly Describe the problem
 
-## Rejection Reason
-### Briefly Describe the problem
+## ✅Expected
+1-
+2-
+3-
+
+## 📷Screenshots

@@ -1,30 +1,30 @@
 ---
 name: Critical Bug report
 about: Create a report to help us improve
-title: Critical BUG
+title: "⚠️\U0001F41ECritical BUG"
 labels: Bug, Critical
 assignees: ''
 
 ---
 
-**Describe the bug**
+## 🐞Describe the bug
 A clear and concise description of what the bug is.
 
-**Why is this bug critical**
-describe why is it critical and should have the highest priority
+## ⚠️ Why is it critical?
+describe briefly why is this problem is critical to the project
 
-**To Reproduce**
+## 🔢To Reproduce
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
-4. See error
+4. See the error
 
-**Expected behavior**
+## ✅Expected behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+## 📷Screenshots
 If applicable, add screenshots to help explain your problem.
 
-**Additional context**
+## 🚨Additional context
 Add any other context about the problem here.

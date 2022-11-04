@@ -13,11 +13,19 @@ assignees: ''
 You need to implement......
 
 ## 📋Task Requirement
-1- Fully Functional Code That Meets The Previous Description
-2- Document Containing: 
-<pre><strong>  - Functions Names and What it does
-  - What did you use (Algorithms / APIs / Frameworks)
-  - Task Description (What did you do)
-</strong></pre>
+1. - [ ] First Requirment:
+    * - [ ] I- Info 1
+    * - [ ] II- Info 2:
+        *  subinfo
+        *  subinfo
+2. - [ ] Documentation That Contains:
+    * - [ ] Task Description
+    * - [ ] Task Details
+	    * What Did You Do in the task
+	    * What Tools did you use in the task
+	    * How to change in the design if needed
+	    * Screenshots
+    * - [ ] Problems You Haven't Solved
+    * - [ ] References
 ## 📍Other Info
 Nothing is here

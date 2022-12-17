@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "server",
 ]
 
 MIDDLEWARE = [
@@ -76,7 +77,7 @@ WSGI_APPLICATION = "AI_Interviewer_Bot.wsgi.application"
 DATABASES = {
      'default': {
          'ENGINE': 'djongo',
-         'NAME': 'AI-Interviewer-DB',
+         'NAME': 'DB',
      }
  }
 

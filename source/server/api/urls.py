@@ -7,6 +7,6 @@ urlpatterns = [
     path('login/', LoginUser),
     path('logout/', LogoutUser),
     path('register/', RegisterUser),
-    path('info/accounttypes', GetAccountTypes)
-    
+    path('info/accounttypes', GetAccountTypes),
+    path('account/profile', CurrentProfile)
 ]

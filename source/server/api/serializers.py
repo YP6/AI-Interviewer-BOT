@@ -9,7 +9,7 @@ class UserSerializer(ModelSerializer):
 class AccountTypeSerializer(ModelSerializer):
     class Meta:
         model = AccountType
-        fields = '__all__'
+        fields = ('typeTitle',)
 
 class TopicSerializer(ModelSerializer):
     class Meta:

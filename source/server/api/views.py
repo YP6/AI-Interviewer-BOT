@@ -2,12 +2,9 @@ import datetime
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated,AllowAny
-
-
 from .serializers import *
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from .serializers import *
 from ..models import yp6AuthenticationToken
 from ..AUTH import CheckAuthorization,Hash,RemoveAuthorization
@@ -43,7 +40,6 @@ def OptainAuthToken(request):
     try:
         token = yp6AuthenticationToken()
         token.userID = User.objects.get(username = request.user.username)
-        
         dt = datetime.datetime.now
         tokenSTR = Hash(str(request.user.id)+ str(dt))
         token.token = tokenSTR
@@ -70,13 +66,12 @@ def getAPIRoutes(request):
     if not CheckAuthorization(request):
         return Response({'Error 401 Unauthorized': 'You Are Not Allowed To View This Page'}, status=401)
     routes = ['GET api/token #Optain_Auth_Token',
-              'GET api/token/refresh #Refresh_Expired_Tokens', 
               'POST api/login', 
               'POST api/logout #Login_Required',
               'POST api/register',
               'GET api/info/accounttypes',
-              'GET api/get-current-user-data #Login_Required', 
-              'GET api/browse-interviews #Login_Required', 
+              'GET api/account/profile #Login_Required', 
+              'GET api/browse-interviews #Login_Required',
               ]
     return Response(routes)
 
@@ -101,4 +96,15 @@ def GetAccountTypes(request):
     types = AccountType.objects.all()
     serializedData = AccountTypeSerializer(types, many=True)
     return Response(serializedData.data)
+
+@login_required
+@api_view(['GET'])
+def CurrentProfile(request):
+    if not CheckAuthorization(request):
+        return Response({'Error 401 Unauthorized': 'You Are Not Allowed To View This Page'}, status=401)
+    user = UserSerializer(request.user, many=False)
+    if user.is_valid:
+        return Response(user.data)
+    else:
+        return Response({'500 Internal Server Error': 'Can\'t rerieve your profile'}, status=500)
 

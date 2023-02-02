@@ -21,8 +21,8 @@ class Permission(models.Model):
 class User(AbstractUser):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
-    gender = models.CharField(max_length=1)
-    dateOfBirth = models.DateField()
+    gender = models.CharField(max_length=1, null=True)
+    dateOfBirth = models.DateField(null=True)
     accountType = models.ForeignKey(AccountType, on_delete=models.CASCADE, null=True)
     email = models.EmailField(unique=True)
     lastModified = models.DateField(auto_now=True)

@@ -8,17 +8,18 @@ import hashlib
 def CheckAuthorization(request):
     try:
         tokenData = yp6AuthenticationToken.objects.get(token = request.headers['Authorization'])
-        if tokenData.expiry < timezone.now():
-            tokenData.delete()
-            return False
-
-        if not (request.user.username == tokenData.userID.username):
-            return False
-
-        if not (request.headers["MAC"] == tokenData.macAddress):
-            return False
     except:
         return False
+    if tokenData.expiry < timezone.now():
+        tokenData.delete()
+        return False
+
+    if not (request.user.username == tokenData.userID.username):
+        return False
+
+    if not (request.headers["MAC"] == tokenData.macAddress):
+        return False
+
 
     tokenData.expiry = timezone.now() + timezone.timedelta(days=7)
     tokenData.save()

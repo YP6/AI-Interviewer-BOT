@@ -21,20 +21,20 @@ def LoginUser(request):
     if user is not None:
         login(request, user)
     
-        return Response({'success' : 'Authorized'})
+        return Response({'OK 200' : 'Sucess', 'detatil':'Authorized'}, status= status.HTTP_200_OK)
     else:
-        return Response({'Error' : 'Wrong Credentials'})
+        return Response({'Error 400' : 'Bad Request','detatil':'Wrong Credentials'}, status=status.HTTP_400_BAD_REQUEST)
     
 
 @api_view(['POST'])
 @IsAuthenticated
 def LogoutUser(request):
     if not RemoveAuthorization(request):
-        return Response({'Error 400': 'Bad Request'}, status=400)
+        return Response({'Error 400': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
 
     logout(request)
     
-    return Response({'Success' : 'Logged Out'})
+    return Response({'OK 200':'Success', 'detail':'Logged Out'}, status=status.HTTP_200_OK)
 
 
 
@@ -50,10 +50,10 @@ def OptainAuthToken(request):
         try:
             token.macAddress = request.headers['MAC']
         except:
-            return Response({'Error 400 Bad Request': 'Mac Address is not provided'}, status=400)
+            return Response({'Error 400': 'Bad Request', 'detatil': 'Mac Address is not Provided'}, status=status.HTTP_400_BAD_REQUEST)
         token.save()
     except:
-        return Response({'Error 400 Bad Request': 'Unauthorized User'}, status=400)
+        return Response({'Error 400': 'Bad Request', 'detail':'Unauthorized User'}, status=status.HTTP_400_BAD_REQUEST)
 
     respones = Response(tokenSTR)
     respones.status_code = 200
@@ -93,13 +93,13 @@ def RegisterUser(request):
     try:
         User.register(**request.data)
     except Exception as err:
-        return Response({'Error 400 Bad Request' : str(err)}, status=400)
+        return Response({'Error 400': 'Bad Request' , 'detail': str(err)}, status=status.HTTP_400_BAD_REQUEST)
     
     username = request.data['username']
     password = request.data['password']
     user = authenticate(request, username=username, password=password)
     login(request, user=user)
-    return Response({'Account Created Successfully'}, status=200)
+    return Response({'OK 200':'Success','detail':'Account Created Successfully'}, status=status.HTTP_200_OK)
    
 
 @api_view(['GET'])
@@ -116,7 +116,7 @@ def CurrentProfile(request):
     if user.is_valid:
         return Response(user.data)
     else:
-        return Response({'500 Internal Server Error': 'Can\'t retrieve your profile'}, status=500)
+        return Response({'Error 500' :  'Internal Server Error','detail': 'Can\'t retrieve your profile'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])

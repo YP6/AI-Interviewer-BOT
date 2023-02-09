@@ -45,7 +45,7 @@ def LoggedOut(view_function):
             except:
                 pass
             return Response({'Error 400': 'Bad Request',
-            "detail": "You Have Been Logged Out in order to register a new account"}, 
+            "detail": "You must log Out in order to register a new account"}, 
             status=status.HTTP_400_BAD_REQUEST)
         return view_function(request, *arge, **kwargs)
     return decorated_function

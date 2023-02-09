@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 import datetime
+from datetime import timedelta
 
 from server.permissions import *
 
@@ -108,7 +109,7 @@ class Topic(models.Model):
 class Interview(models.Model):
     userID = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    duration = models.DurationField()
+    duration = models.IntegerField(default=2)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     def __str__(self):
         return self.title

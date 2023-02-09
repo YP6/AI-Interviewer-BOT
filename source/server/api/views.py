@@ -181,7 +181,7 @@ def GetInterview(request):
 @CanCreateInterview
 @CanCreateQuestion
 def AddInterview(request):
-    interview = Interview.add(**request.data)
+    interview = Interview.add(request.user, **request.data)
     for q in request.data['questions']:
         if q['id'] == None:
             try:
@@ -191,8 +191,8 @@ def AddInterview(request):
                     InterviewQuestion.add(interview, question)
                 else:
                     InterviewQuestion.add(interview, Question.objects.get(question=q['question']))
-            except:
-                return Response({"Error 500" : "Internal Server Error", "detail":"Can't Add Question"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as Err:
+                return Response({"Error 500" : "Internal Server Error", "detail":str(Err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             try:
                 InterviewQuestion.add(interview, Question.objects.get(id=q['id']))
@@ -231,8 +231,8 @@ def EditQuestion(request):
 @IsAuthenticated
 @CanCreateInterview
 def AddInterviewsTopic(request):
-    if Topic.objects.filter(topicName=request.data['name']).exists:
-        return Response({"Error 400":"Bad Request", "detail" :"Topic Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
+    if Topic.objects.filter(topicName=request.data['name']).exists():
+        return Response({"Error 409":"Database Conflict", "detail" :"Topic Already Exists"}, status=status.HTTP_409_CONFLICT)
     else:
         topic = Topic(topicName=request.data['name'])
         topic.save()

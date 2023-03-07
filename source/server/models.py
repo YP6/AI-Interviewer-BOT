@@ -32,6 +32,8 @@ class User(AbstractUser):
         return self.username
 
     def register(username, password, email, first_name, last_name, gender, dateOfBirth, accountType=None):
+        if gender not in ['M', 'F']:
+            raise Exception("Invalid Gender")
         if(accountType):
             try:
                 account = AccountType.objects.filter(typeTitle=accountType)[0]
@@ -39,9 +41,13 @@ class User(AbstractUser):
                 raise Exception("Invalid Account Type")
         else:
             account = AccountType.objects.filter(typeTitle='Interviewee')[0]
-
+        if(len(username)<8):
+            raise Exception("Username Must Be At Least 8 Characters")
+        if(len(email) < 4):
+            raise Exception("Incorrect Email Address")
+        
         username = User.normalize_username(username)
-
+        email = str(email).lower()
         if User.objects.filter(username=username).exists():
             raise Exception("Account Username Already Exists")
         

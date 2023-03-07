@@ -29,12 +29,13 @@ def LoginUser(request):
 @api_view(['POST'])
 @IsAuthenticated
 def LogoutUser(request):
+    respones = Response({'OK 200':'Success', 'detail':'Logged Out'}, status=status.HTTP_200_OK)
+    respones.delete_cookie('csrftoken')
     if not RemoveAuthorization(request):
         return Response({'Error 400': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
-
     logout(request)
     
-    return Response({'OK 200':'Success', 'detail':'Logged Out'}, status=status.HTTP_200_OK)
+    return respones
 
 
 
@@ -68,21 +69,21 @@ superUserTest = user_passes_test(lambda u: u.is_staff, login_url='../')
 def getAPIRoutes(request):
     routes = {
         'api/token': 'GET',
-        'api/login': 'POST', 
-        'api/logout': 'POST',
-        'api/register': 'POST',
-        'api/info/accounttypes': 'GET',
+        'api/account/login': 'POST', 
+        'api/account/logout': 'POST',
+        'api/account/register': 'POST',
         'api/account/profile': 'GET',
-        'api/info/interviews': 'GET',
         'api/account/edit/': 'POST',
-        'account/attendances/': 'GET',
-        'info/interview-topics/': 'GET',
-        'interview/': 'GET',
-        'interview/add/': 'POST',
-        'interview/edit/': 'POST',
-        'question/add/': 'POST',
-        'question/edit/': 'POST',
-        'topic/add/': 'POST',
+        'api/account/attendances/': 'GET',
+        'api/info/accounttypes': 'GET',
+        'api/info/interviews': 'GET',
+        'api/info/interview-topics/': 'GET',
+        'api/interview/': 'GET',
+        'api/interview/add/': 'POST',
+        'api/interview/edit/': 'POST',
+        'api/question/add/': 'POST',
+        'api/question/edit/': 'POST',
+        'api/topic/add/': 'POST',
     }
     return Response(routes)
 

@@ -107,7 +107,7 @@ def RegisterUser(request):
 def GetAccountTypes(request):
     types = AccountType.objects.all()
     serializedData = AccountTypeSerializer(types, many=True)
-    return Response(serializedData.data)
+    return Response(serializedData.data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -184,11 +184,11 @@ def GetInterview(request):
 def AddInterview(request):
     interview = Interview.add(request.user, **request.data)
     for q in request.data['questions']:
-        if q['id'] == None:
+        if not 'id' in q.keys():
             try:
                 question = Question.add(question=q['question'], topic=q['topic'], type=q['type'],
                     level=q['level'], visibility=q['visibility'], userID=request.user.username)
-                if question:
+                if not question == None:
                     InterviewQuestion.add(interview, question)
                 else:
                     InterviewQuestion.add(interview, Question.objects.get(question=q['question']))

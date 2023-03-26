@@ -136,7 +136,7 @@ class Question(models.Model):
         return self.question
     def add(question, topic, type, level, visibility, userID):
         if Question.objects.filter(question=question).exists():
-            return False
+            return None
         else:
             try:
                 question = Question(question=question, topic=topic, type=type, level=level, visibility=visibility, userID=User.objects.get(username=userID))
@@ -154,8 +154,8 @@ class InterviewQuestion(models.Model):
     questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
     interviewID = models.ForeignKey(Interview, on_delete=models.CASCADE)
     def add(i, q):
-        iq = InterviewQuestion(inteviewID= i, questionID=q)
-
+        iq = InterviewQuestion(questionID=q,interviewID= i)
+        iq.save()
 # Report
 class Report(models.Model):
     score = models.IntegerField()

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "server",
     'rest_framework',
     'corsheaders',
+    'Parrot.apps.ParrotConfig',
 ]
 
 AUTH_USER_MODEL = 'server.User'

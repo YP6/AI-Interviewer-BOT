@@ -8,7 +8,8 @@ from .serializers import *
 from ..models import yp6AuthenticationToken
 from ..AUTH import CheckAuthorization, Hash, RemoveAuthorization
 from .decorators import *
-
+from django.apps import apps
+from Parrot.apps import ParrotConfig
 
 @api_view(['POST'])
 @LoggedOut
@@ -231,11 +232,25 @@ def EditInterview(request):
 def AddQuestion(request):
     try:
         if request.data['answers']:
+            appConfig = apps.get_app_config(ParrotConfig.name)
+            parrotModel = appConfig.Parrot
+
             question = Question.add(question=request.data['question'], topic=request.data['topic'],
                                     type=request.data['type'],
                                     level=request.data['level'], visibility=request.data['visibility'],
                                     userID=request.user.username)
             answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
+            
+            paraphrases = parrotModel.augment(input_phrase=request.data['question'])
+
+            for sentence in paraphrases:
+                question = Question.add(question=sentence[0], topic=request.data['topic'],
+                                    type=request.data['type'],
+                                    level=request.data['level'], visibility=request.data['visibility'],
+                                    userID=request.user.username)
+                answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
+            
+            
 
         if not question:
             return Response(

@@ -21,10 +21,13 @@ networkx==3.0
 nltk==3.8.1
 numpy==1.24.2
 packaging==23.0
+pandas==1.5.3
 parrot @ git+https://github.com/PrithivirajDamodaran/Parrot.git@720a87a1ee557d8ed8d9a021adbdd1dd5616c5f9
 Pillow==9.4.0
+protobuf==3.20.0
 psycopg2==2.9.5
 pycparser==2.21
+python-dateutil==2.8.2
 python-Levenshtein==0.20.9
 pytz==2022.6
 PyYAML==6.0
@@ -35,6 +38,7 @@ scikit-learn==1.2.2
 scipy==1.10.1
 sentence-transformers==2.2.2
 sentencepiece==0.1.97
+six==1.16.0
 sqlparse==0.4.3
 sympy==1.11.1
 threadpoolctl==3.1.0

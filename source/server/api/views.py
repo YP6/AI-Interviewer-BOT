@@ -1,4 +1,6 @@
 import datetime
+
+from pydub import AudioSegment
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import *
@@ -14,9 +16,11 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
-from whisper import Whisper
+import whisper
 from moviepy.editor import VideoFileClip
+from ..bot_brain.TextPreprocessing import *
 
+whispermodel = whisper.load_model("base")
 
 @api_view(['POST'])
 @LoggedOut
@@ -329,16 +333,16 @@ def GetNextQuestion(request):
     
     return Response({"attendanceID": request.data['attendanceID'], "question: " : nextQuestion.question, "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
 
-
+@api_view(['POST'])
 def upload_video(request):
-    if request.method == 'POST':
-        video_file = request.FILES['video_file']
-        video_path = os.path.join(settings.MEDIA_ROOT, video_file.name)
-        with open(video_path, 'wb') as f:
-            for chunk in video_file.chunks():
-                f.write(chunk)
-        return extract_text(video_path)
-    return render(request, 'upload_video.html')
+    video_file = request.FILES['Video']
+    video_path = os.path.join(settings.MEDIA_ROOT, video_file.name)
+    with open(video_path, 'wb') as f:
+        for chunk in video_file.chunks():
+            f.write(chunk)
+    extext=extract_text(video_path)
+    print(extext)
+    return Response({extext})
 
 def extract_text(video_path):
     audio_path = os.path.splitext(video_path)[0] + '.wav'
@@ -347,8 +351,10 @@ def extract_text(video_path):
     audio.write_audiofile(audio_path)
     sound = AudioSegment.from_wav(audio_path)
     sound = sound.set_channels(1)
-    with Whisper(audio_path) as whisper:
-        text = whisper.recognize()
+    print(audio_path)
+    text=whispermodel.transcribe("audio.mp3")
+    print(text["text"])
+    print(text)
     os.remove(audio_path)
     os.remove(video_path)
-    return (text)
+    return str(text)

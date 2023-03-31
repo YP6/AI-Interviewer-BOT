@@ -10,6 +10,13 @@ from ..AUTH import CheckAuthorization, Hash, RemoveAuthorization
 from .decorators import *
 from django.apps import apps
 from Parrot.apps import ParrotConfig
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from django.shortcuts import render
+from whisper import Whisper
+from moviepy.editor import VideoFileClip
+
 
 @api_view(['POST'])
 @LoggedOut
@@ -321,3 +328,27 @@ def GetNextQuestion(request):
 
     
     return Response({"attendanceID": request.data['attendanceID'], "question: " : nextQuestion.question, "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
+
+
+def upload_video(request):
+    if request.method == 'POST':
+        video_file = request.FILES['video_file']
+        video_path = os.path.join(settings.MEDIA_ROOT, video_file.name)
+        with open(video_path, 'wb') as f:
+            for chunk in video_file.chunks():
+                f.write(chunk)
+        return extract_text(video_path)
+    return render(request, 'upload_video.html')
+
+def extract_text(video_path):
+    audio_path = os.path.splitext(video_path)[0] + '.wav'
+    video = VideoFileClip(video_path)
+    audio = video.audio
+    audio.write_audiofile(audio_path)
+    sound = AudioSegment.from_wav(audio_path)
+    sound = sound.set_channels(1)
+    with Whisper(audio_path) as whisper:
+        text = whisper.recognize()
+    os.remove(audio_path)
+    os.remove(video_path)
+    return (text)

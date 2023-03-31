@@ -26,4 +26,6 @@ urlpatterns = [
     path('question/edit/', EditQuestion, name='edit-question'),
     
     path('topic/add/', AddInterviewsTopic, name='add-topic'),
+
+    path('video/upload/', upload_video, name='upload_video'),
 ]

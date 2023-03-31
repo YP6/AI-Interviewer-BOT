@@ -84,6 +84,7 @@ def getAPIRoutes(request):
         'api/question/edit/': 'POST',
         'api/topic/add/': 'POST',
         'api/interview/initiate': 'GET',
+        'api/interview/getNextQuestion': 'GET',
     }
     return Response(routes)
 
@@ -305,3 +306,18 @@ def AddInterviewsTopic(request):
         topic = Topic(topicName=request.data['name'])
         topic.save()
     return Response({"Ok 200": "Topic Added Successfully"}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@IsAuthenticated
+def GetNextQuestion(request):
+    interviewQuestions = InterviewSession.objects.filter(attendanceID=request.data['attendanceID'], answer=None)
+    if len(interviewQuestions) == 0:
+        return Response({"status": "Interview is Completed Successfully"}, status=status.HTTP_200_OK)
+
+    question = interviewQuestions[0]
+    nextQuestion = Question.objects.get(question=question.questionID)
+
+
+    
+    return Response({"attendanceID": request.data['attendanceID'], "question: " : nextQuestion.question, "topic": nextQuestion.topic}, status=status.HTTP_200_OK)

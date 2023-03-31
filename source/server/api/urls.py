@@ -20,6 +20,7 @@ urlpatterns = [
     path('interview/add/', AddInterview, name='add-interview'),
     path('interview/edit/', EditInterview, name='edit-interview'),
     path('interview/initiate', InitiateInterview, name='initiate-interview'),
+    path('interview/getNextQuestion', GetNextQuestion, name='get-next-question'),
 
     path('question/add/', AddQuestion, name='add-question'),
     path('question/edit/', EditQuestion, name='edit-question'),

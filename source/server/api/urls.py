@@ -27,5 +27,5 @@ urlpatterns = [
     
     path('topic/add/', AddInterviewsTopic, name='add-topic'),
 
-    path('video/upload/', upload_video, name='upload_video'),
+    path('upload/', upload_video, name='upload_video'),
 ]

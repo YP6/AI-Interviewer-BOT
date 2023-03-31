@@ -187,6 +187,10 @@ class Report(models.Model):
     score = models.IntegerField()
     summary = models.CharField(max_length=255)
 
+    def add (score, summary):
+        report = Report(score=score, summary=summary)
+        report.save()
+        return report
 
 class ReportWeakness(models.Model):
     reportID = models.ForeignKey(Report, on_delete=models.CASCADE)
@@ -205,11 +209,22 @@ class ReportStrengths(models.Model):
 
 
 class InterviewAttendance(models.Model):
-    reportID = models.ForeignKey(Report, on_delete=models.CASCADE)
+    reportID = models.ForeignKey(Report, on_delete=models.CASCADE, null=True)
     interviewID = models.ForeignKey(Interview, on_delete=models.CASCADE)
     userID = models.ForeignKey(User, on_delete=models.CASCADE)
     attendanceDate = models.DateTimeField(auto_now_add=True)
-    duration = models.DurationField()
+    duration = models.IntegerField(default=2)
+
+
+    def add(userID, interviewID, duration, reportID):
+        try:
+            interviewAttendance = InterviewAttendance(userID=User.objects.get(username=userID), 
+                                        interviewID=interviewID, duration=duration, reportID=reportID)
+            interviewAttendance.save()
+        except Exception as err:
+            return err
+
+        return interviewAttendance
 
 
 class yp6AuthenticationToken(models.Model):
@@ -221,3 +236,20 @@ class yp6AuthenticationToken(models.Model):
 
     def __str__(self):
         return self.macAddress
+
+
+class InterviewSession(models.Model):
+    attendanceID = models.ForeignKey(InterviewAttendance, on_delete=models.CASCADE)
+    questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=255, null=True)
+    
+    def add(attendanceID, questionID, answer):
+        try:
+            interviewSession = InterviewSession(attendanceID=attendanceID, 
+                                    questionID=questionID, answer=answer)
+            interviewSession.save()
+
+        except Exception as err:
+            return err
+
+        return interviewSession

@@ -83,6 +83,7 @@ def getAPIRoutes(request):
         'api/question/add/': 'POST',
         'api/question/edit/': 'POST',
         'api/topic/add/': 'POST',
+        'api/interview/initiate': 'GET',
     }
     return Response(routes)
 
@@ -226,6 +227,29 @@ def EditInterview(request):
     pass
 
 
+@api_view(['GET'])
+@IsAuthenticated
+def InitiateInterview(request):
+    try:
+        interview = Interview.objects.get(title=request.data['interviewID'])
+        report = Report.add(score=0, summary="")
+        
+        interviewAttendance = InterviewAttendance.add(userID=request.user.username, duration=interview.duration, 
+                                    interviewID=interview, reportID=report)
+        serializedData = InterviewAttendanceSerializer(interviewAttendance, many=False)
+        
+        questions = InterviewQuestion.objects.filter(interviewID=interviewAttendance.interviewID)
+        
+        for question in questions:
+            interviewSession = InterviewSession.add(attendanceID=interviewAttendance, questionID=question.questionID, answer=None)
+            
+    except Exception as Err:
+                return Response({"Error 500": "Internal Server Error", "detail": str(Err)},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    return Response({"attendanceID: " : interviewAttendance.id}, status=status.HTTP_200_OK)
+    
+
 @api_view(['POST'])
 @IsAuthenticated
 @CanCreateQuestion
@@ -241,14 +265,14 @@ def AddQuestion(request):
                                     userID=request.user.username)
             answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
             
-            paraphrases = parrotModel.augment(input_phrase=request.data['question'])
+           # paraphrases = parrotModel.augment(input_phrase=request.data['question'])
 
-            for sentence in paraphrases:
-                question = Question.add(question=sentence[0], topic=request.data['topic'],
-                                    type=request.data['type'],
-                                    level=request.data['level'], visibility=request.data['visibility'],
-                                    userID=request.user.username)
-                answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
+            #for sentence in paraphrases:
+             #   question = Question.add(question=sentence[0], topic=request.data['topic'],
+              #                      type=request.data['type'],
+               #                     level=request.data['level'], visibility=request.data['visibility'],
+                #                    userID=request.user.username)
+                #answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
             
             
 

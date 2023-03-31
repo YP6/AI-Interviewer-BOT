@@ -44,4 +44,4 @@ class ReportStrengthsSerializer(ModelSerializer):
 class InterviewAttendanceSerializer(ModelSerializer):
     class Meta:
         model = InterviewAttendance
-        fields = '__all__'
+        fields = ('interviewID',)

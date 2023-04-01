@@ -1,5 +1,6 @@
 import datetime
 
+from moviepy.audio.AudioClip import AudioArrayClip
 from pydub import AudioSegment
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -19,8 +20,13 @@ from django.shortcuts import render
 import whisper
 from moviepy.editor import VideoFileClip
 from ..bot_brain.TextPreprocessing import *
+import numpy as np
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+import speech_recognition as sr
+import warnings
 
 whispermodel = whisper.load_model("base")
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 @api_view(['POST'])
 @LoggedOut
@@ -203,9 +209,11 @@ def AddInterview(request):
     if 'answers' in request.data['questions'][0].keys():
         interview = Interview.add(request.user, **request.data)
         if interview == None:
-            return Response({"Error 409": "Database Conflict", "detail": "Interview Already Exists"}, status=status.HTTP_409_CONFLICT)
+            return Response({"Error 409": "Database Conflict", "detail": "Interview Already Exists"},
+                            status=status.HTTP_409_CONFLICT)
     else:
-        return Response({"Error 400": "Bad Request", "detail": "Can't Add interview without questions and answers"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error 400": "Bad Request", "detail": "Can't Add interview without questions and answers"},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     for q in request.data['questions']:
         if not 'id' in q.keys():
@@ -245,22 +253,23 @@ def InitiateInterview(request):
     try:
         interview = Interview.objects.get(title=request.data['interviewID'])
         report = Report.add(score=0, summary="")
-        
-        interviewAttendance = InterviewAttendance.add(userID=request.user.username, duration=interview.duration, 
-                                    interviewID=interview, reportID=report)
+
+        interviewAttendance = InterviewAttendance.add(userID=request.user.username, duration=interview.duration,
+                                                      interviewID=interview, reportID=report)
         serializedData = InterviewAttendanceSerializer(interviewAttendance, many=False)
-        
+
         questions = InterviewQuestion.objects.filter(interviewID=interviewAttendance.interviewID)
-        
+
         for question in questions:
-            interviewSession = InterviewSession.add(attendanceID=interviewAttendance, questionID=question.questionID, answer=None)
-            
+            interviewSession = InterviewSession.add(attendanceID=interviewAttendance, questionID=question.questionID,
+                                                    answer=None)
+
     except Exception as Err:
-                return Response({"Error 500": "Internal Server Error", "detail": str(Err)},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    return Response({"attendanceID: " : interviewAttendance.id}, status=status.HTTP_200_OK)
-    
+        return Response({"Error 500": "Internal Server Error", "detail": str(Err)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({"attendanceID: ": interviewAttendance.id}, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 @IsAuthenticated
@@ -276,17 +285,15 @@ def AddQuestion(request):
                                     level=request.data['level'], visibility=request.data['visibility'],
                                     userID=request.user.username)
             answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
-            
-           # paraphrases = parrotModel.augment(input_phrase=request.data['question'])
 
-            #for sentence in paraphrases:
-             #   question = Question.add(question=sentence[0], topic=request.data['topic'],
-              #                      type=request.data['type'],
-               #                     level=request.data['level'], visibility=request.data['visibility'],
-                #                    userID=request.user.username)
-                #answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
-            
-            
+        # paraphrases = parrotModel.augment(input_phrase=request.data['question'])
+
+        # for sentence in paraphrases:
+        #   question = Question.add(question=sentence[0], topic=request.data['topic'],
+        #                      type=request.data['type'],
+        #                     level=request.data['level'], visibility=request.data['visibility'],
+        #                    userID=request.user.username)
+        # answer = QuestionAnswers.add(question=question, answers=request.data['answers'])
 
         if not question:
             return Response(
@@ -329,9 +336,9 @@ def GetNextQuestion(request):
     question = interviewQuestions[0]
     nextQuestion = Question.objects.get(question=question.questionID)
 
+    return Response({"attendanceID": request.data['attendanceID'], "question: ": nextQuestion.question,
+                     "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
 
-    
-    return Response({"attendanceID": request.data['attendanceID'], "question: " : nextQuestion.question, "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def upload_video(request):
@@ -340,11 +347,12 @@ def upload_video(request):
     with open(video_path, 'wb') as f:
         for chunk in video_file.chunks():
             f.write(chunk)
-    extext=extract_text(video_path)
+    extext = extract_text(video_path,video_file.name)
     print(extext)
+
     return Response({extext})
 
-def extract_text(video_path):
+def extract_text(video_path,name):
     audio_path = os.path.splitext(video_path)[0] + '.wav'
     video = VideoFileClip(video_path)
     audio = video.audio
@@ -352,9 +360,53 @@ def extract_text(video_path):
     sound = AudioSegment.from_wav(audio_path)
     sound = sound.set_channels(1)
     print(audio_path)
-    text=whispermodel.transcribe("audio.mp3")
+    name = name + '\b\b\b\b.wav'
+    print(name)
+    text = whispermodel.transcribe('E:/Graduation Project/AI-Interviewer-BOT/source/server/api/MEDIA/'+name)
+    #arr=np.array(sound.get_array_of_samples(),dtype=np.float32)
+    #arr=arr.reshape(-1,sound.channels)
+    #text = whispermodel.transcribe(arr,language='en')
     print(text["text"])
     print(text)
-    os.remove(audio_path)
-    os.remove(video_path)
+    #os.remove(audio_path)
+    #os.remove(video_path)
     return str(text)
+
+# def extract_text(video_path):
+#     # Extract audio from video file
+#     audio_path = os.path.splitext(video_path)[0] + ".wav"
+#     video = VideoFileClip(video_path)
+#     audio = video.audio
+#     audio.write_audiofile(audio_path)
+#     audio.close()
+#     video.close()  # Release the video file
+#
+#     # Transcribe audio to text using SpeechRecognition library
+#     sound = AudioSegment.from_wav(audio_path)
+#     sound = sound.set_channels(1)
+#     sound = sound.set_frame_rate(16000)
+#     recognizer = sr.Recognizer()
+#     with sr.AudioFile(audio_path) as source:
+#         audio_data = recognizer.record(source)
+#     text = recognizer.recognize_google(audio_data)
+#
+#     # Remove temporary audio file
+#     os.remove(audio_path)
+#     os.remove(video_path)
+#
+#     # Using Similarly function
+#     ans="The four concepts of object-oriented programming are encapsulation, abstraction, inheritance, and polymorphism."
+#     s1, s2, s1_nouns, s2_nouns, s1_nums, s2_nums, s1_num_words, s2_num_words, s1_s2_sim, nouns_sim, num_words_similarity, nums_mismatches=Similarty(text,ans)
+#     print(s1,s2)
+#     print(s1_nouns,s2_nouns)
+#     print(s1_nums,s2_nums)
+#     print(s1_num_words,s2_num_words)
+#     print('-------------------------')
+#     print('-------------------------')
+#     print(s1_s2_sim)
+#     print(nouns_sim)
+#     print(nums_mismatches)
+#     print(num_words_similarity)
+#
+#     # Return the transcribed text
+#     return str(text)

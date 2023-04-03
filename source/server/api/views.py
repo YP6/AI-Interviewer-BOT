@@ -24,11 +24,14 @@ import numpy as np
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 import speech_recognition as sr
 import warnings
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 whispermodel = whisper.load_model("base")
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+
 @api_view(['POST'])
+@csrf_exempt
 @LoggedOut
 def LoginUser(request):
     username = request.data['username']
@@ -36,8 +39,8 @@ def LoginUser(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-
-        return Response({'OK 200': 'Sucess', 'detatil': 'Authorized'}, status=status.HTTP_200_OK)
+        res = Response({'OK 200' : 'Sucess', 'detail':'Authorized'}, status= status.HTTP_200_OK)
+        return res
     else:
         return Response({'Error 400': 'Bad Request', 'detatil': 'Wrong Credentials'},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -64,11 +67,7 @@ def OptainAuthToken(request):
         dt = datetime.datetime.now()
         tokenSTR = Hash(str(request.user.id) + str(dt))
         token.token = tokenSTR
-        try:
-            token.macAddress = request.headers['MAC']
-        except:
-            return Response({'Error 400': 'Bad Request', 'detatil': 'Mac Address is not Provided'},
-                            status=status.HTTP_400_BAD_REQUEST)
+        token.signature = request.META.get['HTTP_USER_AGENT']
         token.save()
     except:
         return Response({'Error 400': 'Bad Request', 'detail': 'Unauthorized User'}, status=status.HTTP_400_BAD_REQUEST)

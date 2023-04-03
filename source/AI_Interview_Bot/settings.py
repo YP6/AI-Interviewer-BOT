@@ -15,7 +15,7 @@ SECRET_KEY = "django-insecure-1lo&)&t6vewf&5=m$5$+^9y+21o3_3i808$v)e=781!))*2tya
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
 
 # Application definition
@@ -45,9 +45,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
+
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = "AI_Interview_Bot.urls"
@@ -115,10 +115,25 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+CORS_ORIGIN_ALLOW_ALL = True 
 STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',  # replace with your React app's domain
+]
+CORS_ALLOW_CREDENTIALS=True
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = False
+CSRF_COOKIE_HTTPONLY = False
+
+CSRF_COOKIE_DOMAIN = ''
+SESSION_COOKIE_DOMAIN = ''
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000']

@@ -17,9 +17,9 @@ def CheckAuthorization(request):
     if not (request.user.username == tokenData.userID.username):
         return False
 
-    if not (request.headers["MAC"] == tokenData.macAddress):
-        return False
 
+    if not (request.META.get('HTTP_USER_AGENT') == tokenData.signature):
+        return False
 
     tokenData.expiry = timezone.now() + timezone.timedelta(days=7)
     tokenData.save()
@@ -33,7 +33,7 @@ def RemoveAuthorization(request):
         if not (request.user.username == tokenData.userID.username):
             return False
 
-        if not (request.headers["MAC"] == tokenData.macAddress):
+        if not (request.META.get('HTTP_USER_AGENT') == tokenData.signature):
             return False
     except:
         return False

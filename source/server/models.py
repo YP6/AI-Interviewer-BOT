@@ -229,13 +229,13 @@ class InterviewAttendance(models.Model):
 
 class yp6AuthenticationToken(models.Model):
     userID = models.ForeignKey(User, on_delete=models.CASCADE)
-    macAddress = models.TextField(null=False, default="0.0.0.0", max_length=20)
+    signature = models.TextField(null=False, default="0.0.0.0", max_length=20)
     optainedTime = models.DateTimeField(auto_now_add=True)
     token = models.TextField(null=False, default="None", max_length=64)
     expiry = models.DateTimeField(default=(datetime.datetime.now() + datetime.timedelta(days=7)))
 
     def __str__(self):
-        return self.macAddress
+        return str(self.signature) + str(self.userID)
 
 
 class InterviewSession(models.Model):

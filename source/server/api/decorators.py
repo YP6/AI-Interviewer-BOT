@@ -12,6 +12,8 @@ from ..permissions import *
 
 def IsAuthenticated(view_function):
     def decorated_function(request, *args, **kwargs):
+        print(request.user.is_authenticated)
+        print(request.COOKIES)
         if not request.user.is_authenticated:
             return Response({'Error 400': 'Bad Request',
             "detail" : "Login Required."},
@@ -20,11 +22,6 @@ def IsAuthenticated(view_function):
         elif not 'Authorization' in request.headers:
             return Response({'Error 400': 'Bad Request',
             "detail": "Authorization required."}, 
-            status=status.HTTP_400_BAD_REQUEST)
-
-        elif not 'MAC' in request.headers:
-            return Response({'Error 400': 'Bad Request',
-            "detail": "MAC required."}, 
             status=status.HTTP_400_BAD_REQUEST)
 
         elif not CheckAuthorization(request):

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 import datetime
 from datetime import timedelta
-
+from .AUTH import Hash
 from server.permissions import *
 
 
@@ -133,14 +133,17 @@ class Interview(models.Model):
     title = models.CharField(max_length=200)
     duration = models.IntegerField(default=2)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    password = models.TextField(null=True)
+    isPrivate = models.BooleanField(null=True)
 
     def __str__(self):
         return self.title
 
-    def add(userID, title, duration, topic, *args, **kwargs):
+    def add(userID, title, duration, topic, password, isPrivate, *args, **kwargs):
         if Interview.objects.filter(title=title).exists():
             return None
-        interview = Interview(userID=userID, title=title, duration=duration, topic=Topic.objects.get(topicName=topic))
+
+        interview = Interview(userID=userID, title=title, duration=duration, isPrivate=isPrivate, password=Hash(password), topic=Topic.objects.get(topicName=topic))
         interview.save()
         return interview
 

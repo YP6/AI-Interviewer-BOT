@@ -21,7 +21,8 @@ class User(AbstractUser):
     accountType = models.ForeignKey(AccountType, on_delete=models.CASCADE, null=True)
     email = models.EmailField(unique=True)
     lastModified = models.DateField(auto_now=True)
-
+    job = models.CharField(max_length=50, null=True)
+    phone = models.CharField(max_length=18, null=True)
     class Meta:
         permissions = [
             (CAN_CREATE_QUESTION, 'Can Create A Question'),
@@ -33,7 +34,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    def register(username, password, email, first_name, last_name, gender, dateOfBirth, accountType=None):
+    def register(username, password, email, first_name, last_name, gender, dateOfBirth, job, phone, accountType=None):
         if gender not in ['M', 'F']:
             raise Exception("Invalid Gender")
         if (accountType):
@@ -57,14 +58,16 @@ class User(AbstractUser):
             raise Exception("Account Email Address Already Exists")
 
         birthDate = datetime.datetime.strptime(str(dateOfBirth), '%d-%m-%Y')
-        print(birthDate)
+        
         user = User(username=username,
                     email=email,
                     first_name=first_name,
                     last_name=last_name,
                     gender=gender,
                     dateOfBirth=birthDate,
-                    accountType=account)
+                    accountType=account,
+                    job=job,
+                    phone=phone)
 
         user.set_password(password)
         user.save()
@@ -77,7 +80,7 @@ class User(AbstractUser):
         except:
             raise Exception("Invalid Group Name")
 
-    def edit(self, username=None, password=None, email=None, first_name=None, last_name=None, accountType=None):
+    def edit(self, username=None, password=None, email=None, first_name=None, last_name=None, accountType=None, job=None, phone=None):
         if not username == None:
             if User.objects.filter(username=username).exists():
                 raise Exception("Account Username Already Exists")
@@ -97,8 +100,15 @@ class User(AbstractUser):
 
         if not first_name == None:
             self.first_name = first_name
+        
         if not last_name == None:
             self.last_name = last_name
+        
+        if not self.job == None:
+            self.job = job
+        
+        if not self.phone == None:
+            self.phone = phone
 
         if not accountType == None:
             try:

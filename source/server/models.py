@@ -266,3 +266,19 @@ class InterviewSession(models.Model):
             return err
 
         return interviewSession
+
+
+class PrivateInterviewsUsers(models.Model):
+    userID = models.ForeignKey(User, on_delete=models.CASCADE)
+    interviewID = models.ForeignKey(Interview, on_delete=models.CASCADE)
+    expiryDate = models.DateField(default=(datetime.datetime.now() + datetime.timedelta(days=7)))
+
+    def add(userID, interviewID, expiryDate):
+        try:
+            interview = PrivateInterviewsUsers(userID , interviewID, expiryDate)
+            interview.save()
+
+        except Exception as err:
+            return err
+
+        return interview

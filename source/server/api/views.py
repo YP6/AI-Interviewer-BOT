@@ -67,10 +67,10 @@ def OptainAuthToken(request):
         dt = datetime.datetime.now()
         tokenSTR = Hash(str(request.user.id) + str(dt))
         token.token = tokenSTR
-        token.signature = request.META.get['HTTP_USER_AGENT']
+        token.signature = request.META.get('HTTP_USER_AGENT')
         token.save()
-    except:
-        return Response({'Error 400': 'Bad Request', 'detail': 'Unauthorized User'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as err:
+        return Response({'Error 400': 'Bad Request', 'detail': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
     respones = Response(tokenSTR)
     respones.status_code = 200

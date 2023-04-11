@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group
 import datetime
 from datetime import timedelta
-from .AUTH import Hash
 from server.permissions import *
 
 
@@ -140,6 +139,8 @@ class Interview(models.Model):
         return self.title
 
     def add(userID, title, duration, topic, password, isPrivate, *args, **kwargs):
+        from .AUTH import Hash
+
         if Interview.objects.filter(title=title).exists():
             return None
 

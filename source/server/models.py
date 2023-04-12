@@ -138,7 +138,7 @@ class Interview(models.Model):
     def __str__(self):
         return self.title
 
-    def add(userID, title, duration, topic, password, isPrivate, *args, **kwargs):
+    def add(userID, title, duration, topic, password="", isPrivate=False):
         from .AUTH import Hash
 
         if Interview.objects.filter(title=title).exists():
@@ -274,9 +274,9 @@ class PrivateInterviewsUsers(models.Model):
     interviewID = models.ForeignKey(Interview, on_delete=models.CASCADE)
     expiryDate = models.DateField(default=(datetime.datetime.now() + datetime.timedelta(days=7)))
 
-    def add(userID, interviewID, expiryDate):
+    def add(userID, interviewID):
         try:
-            interview = PrivateInterviewsUsers(userID , interviewID, expiryDate)
+            interview = PrivateInterviewsUsers(userID=userID , interviewID=interviewID)
             interview.save()
 
         except Exception as err:

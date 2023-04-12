@@ -26,7 +26,7 @@ import speech_recognition as sr
 import warnings
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-whispermodel = whisper.load_model("base")
+#whispermodel = whisper.load_model("base")
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
@@ -206,13 +206,25 @@ def GetInterview(request):
 @CanCreateQuestion
 def AddInterview(request):
     if 'answers' in request.data['questions'][0].keys():
-        interview = Interview.add(request.user, **request.data)
+        interview = Interview.add(userID=request.user, title=request.data['title'], duration=request.data['duration'],
+                                topic=request.data['topic'], password=request.data['password'], isPrivate=request.data['private'])
         if interview == None:
             return Response({"Error 409": "Database Conflict", "detail": "Interview Already Exists"},
                             status=status.HTTP_409_CONFLICT)
     else:
         return Response({"Error 400": "Bad Request", "detail": "Can't Add interview without questions and answers"},
                         status=status.HTTP_400_BAD_REQUEST)
+
+    if request.data['private'] == "True":
+        for user in request.data['users']:
+            if User.objects.filter(email=user).exists():
+                print(User.objects.filter(email=user)[0])
+                
+                privateInterview = PrivateInterviewsUsers.add(userID=User.objects.filter(email=user)[0], interviewID=interview)
+            else:    
+                return Response({"Error 400": "Bad Request", "detail": "Can't add unvalid user"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
 
     for q in request.data['questions']:
         if not 'id' in q.keys():

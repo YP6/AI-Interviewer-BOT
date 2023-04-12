@@ -132,7 +132,7 @@ class Interview(models.Model):
     title = models.CharField(max_length=200)
     duration = models.IntegerField(default=2)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    password = models.TextField(null=True)
+    password = models.TextField(max_length=64,null=True)
     isPrivate = models.BooleanField(null=True)
 
     def __str__(self):
@@ -143,8 +143,12 @@ class Interview(models.Model):
 
         if Interview.objects.filter(title=title).exists():
             return None
+        
+        hash = ""
+        if password:
+            hash = Hash(password)
 
-        interview = Interview(userID=userID, title=title, duration=duration, isPrivate=isPrivate, password=Hash(password), topic=Topic.objects.get(topicName=topic))
+        interview = Interview(userID=userID, title=title, duration=duration, isPrivate=isPrivate, password=hash, topic=Topic.objects.get(topicName=topic))
         interview.save()
         return interview
 

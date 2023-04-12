@@ -215,11 +215,9 @@ def AddInterview(request):
         return Response({"Error 400": "Bad Request", "detail": "Can't Add interview without questions and answers"},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    if request.data['private'] == "True":
+    if request.data['private']:
         for user in request.data['users']:
             if User.objects.filter(email=user).exists():
-                print(User.objects.filter(email=user)[0])
-                
                 privateInterview = PrivateInterviewsUsers.add(userID=User.objects.filter(email=user)[0], interviewID=interview)
             else:    
                 return Response({"Error 400": "Bad Request", "detail": "Can't add unvalid user"},

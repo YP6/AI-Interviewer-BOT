@@ -19,8 +19,8 @@ class TopicSerializer(ModelSerializer):
 class InterviewSerializer(ModelSerializer):
     class Meta:
         model = Interview
-        fields = '__all__'
-
+        exclude = ('password',)
+            
 class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question

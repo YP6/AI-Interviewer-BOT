@@ -121,6 +121,20 @@ def RegisterUser(request):
 
 
 @api_view(['GET'])
+@IsAuthenticated
+def GetAppointemnts(request):
+    response = []
+    privateInterviews = PrivateInterviewsUsers.objects.filter(userID=request.user.id)
+    
+    for interview in privateInterviews:
+        details = Interview.objects.get(title=interview.interviewID)
+        response.append(InterviewSerializer(details).data)
+    
+    return Response(response,status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET'])
 def GetAccountTypes(request):
     types = AccountType.objects.all()
     serializedData = AccountTypeSerializer(types, many=True)

@@ -11,6 +11,7 @@ urlpatterns = [
     path('account/profile/', CurrentProfile, name='profile'),
     path('account/edit/', EditAccount, name='edit-user'),
     path('account/attendances/', GetInterviewAttendances, name='user-attendances'),
+    path('account/getAppointemnts/', GetAppointemnts, name='get-appointments'),
 
     path('info/accounttypes/', GetAccountTypes, name='accounttypes'),
     path('info/interviews/', GetInterviews, name='interviews'),

@@ -358,7 +358,7 @@ def AddInterviewsTopic(request):
     return Response({"Ok 200": "Topic Added Successfully"}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @IsAuthenticated
 def GetNextQuestion(request):
     interviewQuestions = InterviewSession.objects.filter(attendanceID=request.data['attendanceID'], answer=None)

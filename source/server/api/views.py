@@ -275,6 +275,11 @@ def EditInterview(request):
 def InitiateInterview(request):
     try:
         interview = Interview.objects.get(title=request.data['interviewID'])
+        if interview.isPrivate == True:
+            passwordHash = Hash(request.data['password'])
+            if passwordHash != interview.password:
+                return Response({"Error 403": "FORBIDDEN", "detail": "Invalid Password. Try Again"}, status=status.HTTP_403_FORBIDDEN)
+        
         report = Report.add(score=0, summary="")
 
         interviewAttendance = InterviewAttendance.add(userID=request.user.username, duration=interview.duration,

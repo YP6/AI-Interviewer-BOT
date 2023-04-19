@@ -19,7 +19,8 @@ class TopicSerializer(ModelSerializer):
 class InterviewSerializer(ModelSerializer):
     class Meta:
         model = Interview
-        exclude = ('password',)
+        fields = ('userID', 'title', 'duration','topic', 'isPrivate')
+
             
 class QuestionSerializer(ModelSerializer):
     class Meta:

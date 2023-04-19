@@ -157,6 +157,10 @@ def CurrentProfile(request):
 def GetInterviews(request):
     interviews = Interview.objects.all()
     serializedData = InterviewSerializer(interviews, many=True)
+    for i in range(len(serializedData.data)):
+        topicID = serializedData.data[i]['topic']
+        topic = Topic.objects.get(id=topicID)
+        serializedData.data[i]['topic'] = topic.topicName
     return Response(serializedData.data)
 
 
@@ -270,7 +274,7 @@ def EditInterview(request):
     pass
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @IsAuthenticated
 def InitiateInterview(request):
     try:

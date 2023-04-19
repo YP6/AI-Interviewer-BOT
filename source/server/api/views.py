@@ -278,7 +278,7 @@ def InitiateInterview(request):
         if interview.isPrivate == True:
             passwordHash = Hash(request.data['password'])
             if passwordHash != interview.password:
-                return Response({"Error 403": "FORBIDDEN", "detail": "Invalid Password. Try Again"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"Error 403": "FORBIDDEN", "details": "Invalid Password. Try Again"}, status=status.HTTP_403_FORBIDDEN)
         
         report = Report.add(score=0, summary="")
 

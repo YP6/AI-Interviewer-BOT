@@ -43,8 +43,8 @@ class User(AbstractUser):
                 raise Exception("Invalid Account Type")
         else:
             account = AccountType.objects.filter(typeTitle='Interviewee')[0]
-        if (len(username) < 8):
-            raise Exception("Username Must Be At Least 8 Characters")
+        if (len(username) < 4):
+            raise Exception("Username Must Be At Least 4 Characters")
         if (len(email) < 4):
             raise Exception("Incorrect Email Address")
 

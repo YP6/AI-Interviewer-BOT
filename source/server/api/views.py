@@ -371,8 +371,7 @@ def GetNextQuestion(request):
 
     response = Response({"question": nextQuestion.question,
                      "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
-    if "questionID" in request.COOKIES:
-        response.delete_cookie("questionID")
+    
     response.set_cookie(key="questionID", value=nextQuestion.id, secure=True, httponly=True)
     return response
 
@@ -399,9 +398,9 @@ def AnswerQuestion(request):
 @api_view(['POST'])
 @IsAuthenticated
 def GetAnswerResponse(request):
-    attendanceId = request.data['attendanceId']
-    questionId = request.data['questionId']
-    session = InterviewSession.objects.filter(attendanceId = attendanceId, questionId=questionId)[0]
+    attendanceID = request.COOKIES['attendanceID']
+    questionID = request.COOKIES['questionID']
+    session = InterviewSession.objects.filter(attendanceID = attendanceID, questionID=questionID)[0]
     if session.processed == True:
         return Response({'Accepted':'202', 'detail': session.botResponse, 'tryAgain':session.canTryAgain})
     else:

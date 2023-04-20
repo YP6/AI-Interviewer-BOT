@@ -295,8 +295,8 @@ def InitiateInterview(request):
         return Response({"Error 500": "Internal Server Error", "detail": str(Err)},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     response = Response(status=status.HTTP_201_CREATED)
-    response.set_cookie(key="attendaceID", value=interviewAttendance.id, httponly=True, secure=True)
-    return Response({"attendanceID: ": interviewAttendance.id}, status=status.HTTP_200_OK)
+    response.set_cookie(key="attendanceID", value=interviewAttendance.id, httponly=True, secure=True)
+    return response
 
 
 @api_view(['POST'])
@@ -373,16 +373,16 @@ def GetNextQuestion(request):
                      "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
     if "questionID" in request.COOKIES:
         response.delete_cookie("questionID")
-    response.set_cookie(key="questionID", value=nextQuestion.questionID, secure=True, httponly=True)
-    return 
+    response.set_cookie(key="questionID", value=nextQuestion.id, secure=True, httponly=True)
+    return response
 
 
 @api_view(['POST'])
 @IsAuthenticated
 def AnswerQuestion(request):
     try:
-        attendanceId = request.COOKIES['attendanceID']
-        questionId = request.COOKIES['questionID']
+        attendanceID = request.COOKIES['attendanceID']
+        questionID = request.COOKIES['questionID']
         videoFile = request.FILES['Video']
     except Exception as err:
         return Response({"Error 400" : "Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
@@ -391,7 +391,7 @@ def AnswerQuestion(request):
     with open(videoPath, 'wb') as f:
         for chunk in videoFile.chunks():
             f.write(chunk)
-    session = InterviewSession.objects.filter(attendanceId = attendanceId, questionId=questionId)[0]
+    session = InterviewSession.objects.filter(attendanceID = attendanceID, questionID=questionID)[0]
     session.videoPath = videoPath
     session.save()
     return Response({"Success": '200', 'detail':'Video Uploading Successfuly'}, status=status.HTTP_200_OK)

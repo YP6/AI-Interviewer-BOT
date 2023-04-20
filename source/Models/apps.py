@@ -23,14 +23,14 @@ class ModelsConfig(AppConfig):
 
     def ready(self):
         from server.models import InterviewSession
-        model = whisper.load_model("base")
+        # model = whisper.load_model("base")
                 
         interviews = InterviewSession.objects.filter(processed=False)
 
-        for interview in interviews:
-            if interview.videoPath:
-                audioPath = ModelsConfig.toMP3(interview) 
-                result = model.transcribe(audioPath)
-                interview.answer = result['text']
-                interview.processed = True
-                interview.save()
+        # for interview in interviews:
+        #     if interview.videoPath:
+        #         audioPath = ModelsConfig.toMP3(interview) 
+        #         result = model.transcribe(audioPath)
+        #         interview.answer = result['text']
+        #         interview.processed = True
+        #         interview.save()

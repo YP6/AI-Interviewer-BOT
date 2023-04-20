@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIA_ROOT = Path.joinpath(BASE_DIR,'/Graduation Project/AI-Interviewer-BOT/source/server/api/MEDIA/')
+MEDIA_ROOT = Path.joinpath(BASE_DIR,'/Code/Repos/AI-Interviewer-BOT/source/assets')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

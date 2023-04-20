@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "server",
     'rest_framework',
     'corsheaders',
+    'Models.apps.ModelsConfig',
     #'Parrot.apps.ParrotConfig',
 ]
 

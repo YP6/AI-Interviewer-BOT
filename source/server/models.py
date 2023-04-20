@@ -260,7 +260,11 @@ class InterviewSession(models.Model):
     attendanceID = models.ForeignKey(InterviewAttendance, on_delete=models.CASCADE)
     questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.CharField(max_length=255, null=True)
-    
+    videoPath = models.TextField(default="")
+    graded = models.BooleanField(default=False)
+    processed  = models.BooleanField(default=False)
+    grade = models.FloatField(default=0)
+
     def add(attendanceID, questionID, answer):
         try:
             interviewSession = InterviewSession(attendanceID=attendanceID, 

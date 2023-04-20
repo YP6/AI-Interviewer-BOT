@@ -17,17 +17,12 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
-import whisper
 from moviepy.editor import VideoFileClip
 from ..bot_brain.TextPreprocessing import *
 import numpy as np
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 import speech_recognition as sr
-import warnings
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-
-#whispermodel = whisper.load_model("base")
-warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 @api_view(['POST'])

@@ -264,7 +264,8 @@ class InterviewSession(models.Model):
     graded = models.BooleanField(default=False)
     processed  = models.BooleanField(default=False)
     grade = models.FloatField(default=0)
-
+    botResponse = models.TextField(default="")
+    canTryAgain = models.BooleanField(default=False)
     def add(attendanceID, questionID, answer):
         try:
             interviewSession = InterviewSession(attendanceID=attendanceID, 

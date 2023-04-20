@@ -294,7 +294,8 @@ def InitiateInterview(request):
     except Exception as Err:
         return Response({"Error 500": "Internal Server Error", "detail": str(Err)},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    response = Response(status=status.HTTP_201_CREATED)
+    response.set_cookie(key="attendaceID", value=interviewAttendance.id, httponly=True, secure=True)
     return Response({"attendanceID: ": interviewAttendance.id}, status=status.HTTP_200_OK)
 
 
@@ -353,87 +354,55 @@ def AddInterviewsTopic(request):
     return Response({"Ok 200": "Topic Added Successfully"}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @IsAuthenticated
 def GetNextQuestion(request):
-    interviewQuestions = InterviewSession.objects.filter(attendanceID=request.data['attendanceID'], answer=None)
+    try:
+        attendanceID = request.COOKIES['attendanceID']
+    except Exception as err:
+        return Response({"Error 400" : "Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    interviewQuestions = InterviewSession.objects.filter(attendanceID=attendanceID, answer=None)
     if len(interviewQuestions) == 0:
         return Response({"status": "Interview is Completed Successfully"}, status=status.HTTP_200_OK)
 
     question = interviewQuestions[0]
     nextQuestion = Question.objects.get(question=question.questionID)
 
-    return Response({"attendanceID": request.data['attendanceID'], "question: ": nextQuestion.question,
+    response = Response({"question": nextQuestion.question,
                      "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
+    if "questionID" in request.COOKIES:
+        response.delete_cookie("questionID")
+    response.set_cookie(key="questionID", value=nextQuestion.questionID, secure=True, httponly=True)
+    return 
 
 
 @api_view(['POST'])
-def upload_video(request):
-    video_file = request.FILES['Video']
-    video_path = os.path.join(settings.MEDIA_ROOT, video_file.name)
-    with open(video_path, 'wb') as f:
-        for chunk in video_file.chunks():
+@IsAuthenticated
+def AnswerQuestion(request):
+    try:
+        attendanceId = request.COOKIES['attendanceID']
+        questionId = request.COOKIES['questionID']
+        videoFile = request.FILES['Video']
+    except Exception as err:
+        return Response({"Error 400" : "Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
+
+    videoPath = os.path.join(settings.MEDIA_ROOT, videoFile.name)
+    with open(videoPath, 'wb') as f:
+        for chunk in videoFile.chunks():
             f.write(chunk)
-    extext = extract_text(video_path,video_file.name)
-    print(extext)
+    session = InterviewSession.objects.filter(attendanceId = attendanceId, questionId=questionId)[0]
+    session.videoPath = videoPath
+    session.save()
+    return Response({"Success": '200', 'detail':'Video Uploading Successfuly'}, status=status.HTTP_200_OK)
 
-    return Response({extext})
-
-def extract_text(video_path,name):
-    audio_path = os.path.splitext(video_path)[0] + '.wav'
-    video = VideoFileClip(video_path)
-    audio = video.audio
-    audio.write_audiofile(audio_path)
-    sound = AudioSegment.from_wav(audio_path)
-    sound = sound.set_channels(1)
-    print(audio_path)
-    name = name + '\b\b\b\b.wav'
-    print(name)
-    text = whispermodel.transcribe('E:/Graduation Project/AI-Interviewer-BOT/source/server/api/MEDIA/'+name)
-    #arr=np.array(sound.get_array_of_samples(),dtype=np.float32)
-    #arr=arr.reshape(-1,sound.channels)
-    #text = whispermodel.transcribe(arr,language='en')
-    print(text["text"])
-    print(text)
-    #os.remove(audio_path)
-    #os.remove(video_path)
-    return str(text)
-
-# def extract_text(video_path):
-#     # Extract audio from video file
-#     audio_path = os.path.splitext(video_path)[0] + ".wav"
-#     video = VideoFileClip(video_path)
-#     audio = video.audio
-#     audio.write_audiofile(audio_path)
-#     audio.close()
-#     video.close()  # Release the video file
-#
-#     # Transcribe audio to text using SpeechRecognition library
-#     sound = AudioSegment.from_wav(audio_path)
-#     sound = sound.set_channels(1)
-#     sound = sound.set_frame_rate(16000)
-#     recognizer = sr.Recognizer()
-#     with sr.AudioFile(audio_path) as source:
-#         audio_data = recognizer.record(source)
-#     text = recognizer.recognize_google(audio_data)
-#
-#     # Remove temporary audio file
-#     os.remove(audio_path)
-#     os.remove(video_path)
-#
-#     # Using Similarly function
-#     ans="The four concepts of object-oriented programming are encapsulation, abstraction, inheritance, and polymorphism."
-#     s1, s2, s1_nouns, s2_nouns, s1_nums, s2_nums, s1_num_words, s2_num_words, s1_s2_sim, nouns_sim, num_words_similarity, nums_mismatches=Similarty(text,ans)
-#     print(s1,s2)
-#     print(s1_nouns,s2_nouns)
-#     print(s1_nums,s2_nums)
-#     print(s1_num_words,s2_num_words)
-#     print('-------------------------')
-#     print('-------------------------')
-#     print(s1_s2_sim)
-#     print(nouns_sim)
-#     print(nums_mismatches)
-#     print(num_words_similarity)
-#
-#     # Return the transcribed text
-#     return str(text)
+@api_view(['POST'])
+@IsAuthenticated
+def GetAnswerResponse(request):
+    attendanceId = request.data['attendanceId']
+    questionId = request.data['questionId']
+    session = InterviewSession.objects.filter(attendanceId = attendanceId, questionId=questionId)[0]
+    if session.processed == True:
+        return Response({'Accepted':'202', 'detail': session.botResponse, 'tryAgain':session.canTryAgain})
+    else:
+        return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)

@@ -14,7 +14,6 @@ def toMP3(instance):
         videoPath = instance.videoPath
         
         audioPath = os.path.splitext(videoPath)[0] + '.mp3'
-        
         audio = AudioSegment.from_file(videoPath)
         audio.export(audioPath, format='mp3')
         
@@ -49,7 +48,7 @@ def extractEmotions(videoPath,tempPath, interval=5):
         frame = cv2.resize(frame, (1280, 720))
         if not ret:
             break
-        faceDetector = cv2.CascadeClassifier('D:/Code/Repos/AI-Interviewer-BOT/source/Models/haarcascade_frontalface_default.xml')
+        faceDetector = cv2.CascadeClassifier(str(XML_ROOT)+'/haarcascade_frontalface_default.xml')
         grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # detect faces available on camera
         numFaces = faceDetector.detectMultiScale(grayFrame, scaleFactor=1.3, minNeighbors=5)
@@ -80,26 +79,31 @@ def answerExtraction():
         interviews = InterviewSession.objects.filter(processed=False)
 
         for interview in interviews:
-            if interview.videoPath:
-                # Extracing answer text from the video.
-                audioPath = toMP3(interview) 
-                result = model.transcribe(audioPath, language='en', fp16=False)
-                interview.answer = result['text']
+            try:
+                if interview.videoPath and not interview.processed:
+                    # Extracing answer text from the video.
+                    
+                    # audioPath = toMP3(interview) 
+                    # result = model.transcribe(audioPath, language='en', fp16=False)
+                    # interview.answer = result['text']
+                    
+                    # Extracting emotions from the video.
+                    emotions = extractEmotions(interview.videoPath, str(MEDIA_ROOT)+'/tempImage.jpg', interval=30)
+                    percentSum = sum(emotions.values())
 
-                # Extracting emotions from the video.
-                emotions = extractEmotions(interview.videoPath, 'D:/Code/Repos/AI-Interviewer-BOT/source/assets/tempImage.jpg', interval=30)
-                percentSum = sum(emotions.values())
+                    # calculate adjusted percentages and store in a list of tuples
+                    adjustedPercentages = [(emotion, count / (percentSum+1) * 100) for emotion, count in emotions.items()]
 
-                # calculate adjusted percentages and store in a list of tuples
-                adjustedPercentages = [(emotion, count / percentSum * 100) for emotion, count in emotions.items()]
-
-                # sort the adjusted percentages in descending order by percentage
-                adjustedPercentages.sort(key=lambda x: x[1], reverse=True)
+                    # sort the adjusted percentages in descending order by percentage
+                    adjustedPercentages.sort(key=lambda x: x[1], reverse=True)
 
 
-                for emotion, percentage in adjustedPercentages:
-                    print(f"{emotion}: {percentage:.2f}%")
-                
-                interview.processed = True
-                interview.save()
+                    # for emotion, percentage in adjustedPercentages:
+                    #     print(f"{emotion}: {percentage:.2f}%")
+                    interview.botResponse = str(adjustedPercentages)
+                    interview.processed = True
+                    interview.save()
+            except Exception as err:
+                print(err)
+                pass
 

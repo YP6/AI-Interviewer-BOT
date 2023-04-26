@@ -15,13 +15,7 @@ from django.apps import apps
 from Parrot.apps import ParrotConfig
 import os
 from django.conf import settings
-from django.http import HttpResponse
-from django.shortcuts import render
-from moviepy.editor import VideoFileClip
 from ..bot_brain.TextPreprocessing import *
-import numpy as np
-from moviepy.audio.io.AudioFileClip import AudioFileClip
-import speech_recognition as sr
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 
@@ -35,6 +29,7 @@ def LoginUser(request):
     if user is not None:
         login(request, user)
         res = Response({'OK 200' : 'Sucess', 'detail':'Authorized'}, status= status.HTTP_200_OK)
+        res.set_cookie('accountType', str(request.user.accountType), secure=True)
         return res
     else:
         return Response({'Error 400': 'Bad Request', 'detatil': 'Wrong Credentials'},
@@ -141,7 +136,9 @@ def GetAccountTypes(request):
 def CurrentProfile(request):
     user = UserSerializer(request.user, many=False)
     if user.is_valid:
-        return Response(user.data)
+        data = user.data
+        data['accountType'] = str(request.user.accountType)
+        return Response(data)
     else:
         return Response({'Error 500': 'Internal Server Error', 'detail': 'Can\'t retrieve your profile'},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -393,7 +390,7 @@ def AnswerQuestion(request):
     session = InterviewSession.objects.filter(attendanceID = attendanceID, questionID=questionID)[0]
     session.videoPath = videoPath
     session.save()
-    return Response({"Success": '200', 'detail':'Video Uploading Successfuly'}, status=status.HTTP_200_OK)
+    return Response({"Success": '200', 'detail':'Video Uploaded Successfuly'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @IsAuthenticated
@@ -405,3 +402,35 @@ def GetAnswerResponse(request):
         return Response({'Accepted':'202', 'detail': session.botResponse, 'tryAgain':session.canTryAgain})
     else:
         return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)
+@api_view(['GET'])
+@IsAuthenticated
+def GetCreatedInterviews(request):
+    print(request.user.accountType)
+    if not str(request.user.accountType) in ['Admin', 'Interviewer', 'Company']:
+        return Response({'Error 401':'Unauthorized Access', 'detail':'Account Type is not authorized to create or view created interviews'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    interviews = Interview.objects.filter(userID=request.user)
+    serializedData = InterviewSerializer(interviews, many=True)
+    data = []
+    for i in serializedData.data:
+        i['attendanceCount'] = len(InterviewAttendance.objects.filter(interviewID=Interview.objects.get(title=i['title'])))
+        i['topic'] = str(Topic.objects.filter(id=i['topic'])[0])
+        data.append(i)
+    return Response(data)
+
+@api_view(['POST'])
+@IsAuthenticated
+def GetAttendedInterviewees(request):
+    try:
+        interview = Interview.objects.get(title=request.data['interviewID'])
+    except Exception as err:
+        return Response({"Error 400":"Bad Request", 'detail':str(err)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    data =[]
+    for attendance in InterviewAttendance.objects.filter(interviewID = interview):
+        user = OutsideUserSerializer(attendance.userID)
+        temp = user.data
+        temp['attendanceID'] = attendance.id
+        temp['attendanceData'] = attendance.attendanceDate
+        data.append(temp)
+    return Response(data, status=status.HTTP_200_OK)

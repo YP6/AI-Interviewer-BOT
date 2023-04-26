@@ -77,32 +77,3 @@ def Hash(data):
     # Returning the Hash
     return hashed.hexdigest()
 
-
-def Encrypt(Var):
-    # """
-    # :param Var: the value which will be encrypted
-
-    # notes*
-    # 1- value must be string
-    # 2- value must convert to bytes
-    # 3- the key must keep save      //important
-    # 4- we will use the key in decryption //important
-    # 5- this function can encrypt same variable twice.
-
-    # :return: token -> the same value but after encryption
-    # """
-    #Variable = bytes(Var, 'utf-8')
-    Variable=Var.encode()
-    token = f.encrypt(Variable)
-    return token
-
-
-def Decrypt(token):
-    """
-    :param token: the encrypted variable
-    :return: decrypted variable
-    """
-    d = f.decrypt(token)
-    return d.decode()
-
-

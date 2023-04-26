@@ -7,7 +7,7 @@ class ModelsConfig(AppConfig):
     name = "Models"
 
     def ready(self):
-        # t = threading.Thread(target=answerExtraction)
-        # t.daemon = True
-        # t.start()
-        pass
+        t = threading.Thread(target=answerExtraction)
+        t.daemon = True
+        t.start()
+        

@@ -83,9 +83,9 @@ def answerExtraction():
                 if interview.videoPath and not interview.processed:
                     # Extracing answer text from the video.
                     
-                    # audioPath = toMP3(interview) 
-                    # result = model.transcribe(audioPath, language='en', fp16=False)
-                    # interview.answer = result['text']
+                    audioPath = toMP3(interview) 
+                    result = model.transcribe(audioPath, language='en', fp16=False)
+                    interview.answer = result['text']
                     
                     # Extracting emotions from the video.
                     emotions = extractEmotions(interview.videoPath, str(MEDIA_ROOT)+'/tempImage.jpg', interval=30)

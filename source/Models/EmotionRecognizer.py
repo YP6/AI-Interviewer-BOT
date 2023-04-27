@@ -56,6 +56,8 @@ def extractEmotions(videoPath,tempPath, interval=5):
                 #small_frame = cv2.resize(grayFrame, (0, 0), fx=0.5, fy=0.5)
                 emotionPrediction = DeepFace.analyze(img_path=tempPath, actions=['emotion'], enforce_detection=False)
                 dominant_emotion = emotionPrediction[0]['dominant_emotion']
+                if emotionPrediction[0]['emotion'][dominant_emotion]<50:
+                    dominant_emotion='neutral'
                 # Increment the counter for the detected emotion
                 emotion_counts[dominant_emotion] += 1
                 

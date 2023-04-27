@@ -408,14 +408,11 @@ def AnswerQuestion(request):
 def GetAnswerResponse(request):
     attendanceID = request.COOKIES['attendanceID']
     questionID = request.COOKIES['questionID']
-    try:
-        result = InterviewResult.objects.get(attendanceID = attendanceID, questionID=questionID)
-    except:
-        return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)
-    
-    session = InterviewSession.objects.get(attendanceID = attendanceID, questionID=questionID)
-    if result.analyzed == True:
-        return Response({'Accepted':'202', 'detail': result.botResponse, 'tryAgain':session.canTryAgain})
+
+    session = InterviewSession.objects.filter(attendanceID = attendanceID, questionID=questionID)[0]
+
+    if session.graded:
+        return Response({'Accepted':'202', 'detail': session.botResponse, 'tryAgain':session.canTryAgain})
     else:
         return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)
 @api_view(['GET'])

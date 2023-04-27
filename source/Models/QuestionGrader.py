@@ -77,21 +77,18 @@ def QuestionGrader():
                 question = session.questionID
                 answers = QuestionAnswers.objects.filter(questionID=question)
                 grade = 0
-                bestGrade = None
+                bestGrade = SP
                 for answer in answers:
-                    if len(answer.answer) > 0:
-                        SP.clear()
-                        SP.data = [answer.answer, session.answer]
-                        SP.Preprocess()
-                        score = GraderModel.predict([SP.embeddings[0], SP.embeddings[1]]) * 100
-                        if score > grade:
-                            grade = score
-                            bestGrade = SP
-                        print(score, grade)
+                    SP.clear()
+                    SP.data = [answer.answer, session.answer]
+                    SP.Preprocess()
+                    score = GraderModel.predict([SP.embeddings[0], SP.embeddings[1]]) * 100
+                    if score > grade:
+                        grade = score
+                        bestGrade = SP
+                    print(score, grade)
                 
-                InterviewResult.add(attendanceID=session.attendanceID, questionID=session.questionID, answer=session.answer,
-                                                videoPath=session.videoPath, grade=grade, importantWords=str(bestGrade.ExtractImportantWords()[1]), importantSentences=str(bestGrade.ExtractImportantSentences()[1]))
-
+                
                 if score < 50:
                     session.canTryAgain = True
 
@@ -116,8 +113,10 @@ def QuestionGrader():
                 session.botResponse = botResponse
                 session.save()
                 
+                InterviewResult.add(attendanceID=session.attendanceID, questionID=session.questionID, answer=session.answer,
+                                                videoPath=session.videoPath, grade=grade, importantWords=str(bestGrade.ExtractImportantWords()[1]), importantSentences=str(bestGrade.ExtractImportantSentences()[1]))
+
+                
             except Exception as err:
-                print("Question Grader Error:")
-                SP.Preprocess()
                 print("Question Grader Error:",err)
             

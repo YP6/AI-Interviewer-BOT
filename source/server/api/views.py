@@ -359,9 +359,20 @@ def GetNextQuestion(request):
     except Exception as err:
         return Response({"Error 400" : "Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
     
-    interviewQuestions = InterviewSession.objects.filter(attendanceID=attendanceID, answer=None)
+    try:
+        questionID = request.COOKIES['questionID']
+        question = InterviewSession.objects.get(attendanceID=attendanceID, questionID=questionID)
+        if question.graded:
+            question.delete()
+    except:
+        pass
+
+    interviewQuestions = InterviewSession.objects.filter(attendanceID=attendanceID, answer=None, graded=False)
     if len(interviewQuestions) == 0:
-        return Response({"status": "Interview is Completed Successfully"}, status=status.HTTP_200_OK)
+        res = Response({"status": "Interview is Completed Successfully"}, status=status.HTTP_200_OK)
+        res.delete_cookie('attendanceID')
+        res.delete_cookie('questionID')
+        return res
 
     question = interviewQuestions[0]
     nextQuestion = Question.objects.get(question=question.questionID)
@@ -383,7 +394,7 @@ def AnswerQuestion(request):
     except Exception as err:
         return Response({"Error 400" : "Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
-    videoPath = os.path.join(settings.MEDIA_ROOT, videoFile.name)
+    videoPath = os.path.join(settings.MEDIA_ROOT, str(attendanceID)+'-'+str(questionID)+'-'+videoFile.name)
     with open(videoPath, 'wb') as f:
         for chunk in videoFile.chunks():
             f.write(chunk)
@@ -397,9 +408,14 @@ def AnswerQuestion(request):
 def GetAnswerResponse(request):
     attendanceID = request.COOKIES['attendanceID']
     questionID = request.COOKIES['questionID']
-    session = InterviewSession.objects.filter(attendanceID = attendanceID, questionID=questionID)[0]
-    if session.processed == True:
-        return Response({'Accepted':'202', 'detail': session.botResponse, 'tryAgain':session.canTryAgain})
+    try:
+        result = InterviewResult.objects.get(attendanceID = attendanceID, questionID=questionID)
+    except:
+        return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)
+    
+    session = InterviewSession.objects.get(attendanceID = attendanceID, questionID=questionID)
+    if result.analyzed == True:
+        return Response({'Accepted':'202', 'detail': result.botResponse, 'tryAgain':session.canTryAgain})
     else:
         return Response({'Waiting Model': '204 No Content', 'detail':'Try Again on a moment'}, status=status.HTTP_204_NO_CONTENT)
 @api_view(['GET'])

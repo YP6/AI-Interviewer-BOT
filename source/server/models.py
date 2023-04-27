@@ -255,7 +255,37 @@ class yp6AuthenticationToken(models.Model):
     def __str__(self):
         return str(self.signature) + str(self.userID)
 
+class InterviewResult(models.Model):
+    attendanceID = models.ForeignKey(InterviewAttendance, on_delete=models.CASCADE)
+    questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=255, null=True)
+    videoPath = models.TextField(default="")
+    grade = models.FloatField(default=0)
+    importantWords = models.TextField(null=True)
+    importantSentences = models.TextField(null=True)
+    angry = models.FloatField(null=False, default=0)
+    happy = models.FloatField(null=False, default=0)
+    disgust = models.FloatField(null=False, default=0)
+    fear = models.FloatField(null=False, default=0)
+    neutral = models.FloatField(null=False, default=0)
+    sad = models.FloatField(null=False, default=0)
+    surprise = models.FloatField(null=False, default=0)
+    status = models.CharField(max_length=6, default='Failed')
+    analysed = models.BooleanField(null=False, default=False)
 
+    def add(attendanceID, questionID, answer, videoPath, grade, importantWords, importantSentences, 
+            angry=0, happy=0, disgust=0, fear=0, neutral=0, sad=0, surprise=0, analysed=False):
+        try:
+            interviewResult = InterviewResult(attendanceID=attendanceID, questionID=questionID, answer=answer, videoPath=videoPath,
+                                            grade=grade, importantWords=importantWords, importantSentences=importantSentences, 
+                                            angry = angry, happy=happy, disgust=disgust, fear=fear, neutral=neutral, sad=sad,
+                                            surprise=surprise, status=("Failed" if grade < 50 else "Pass"), analysed=analysed)
+            interviewResult.save()
+        except Exception as err:
+            return err
+        return interviewResult
+
+                                           
 class InterviewSession(models.Model):
     attendanceID = models.ForeignKey(InterviewAttendance, on_delete=models.CASCADE)
     questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -266,7 +296,6 @@ class InterviewSession(models.Model):
     grade = models.FloatField(default=0)
     botResponse = models.TextField(default="", null=True)
     canTryAgain = models.BooleanField(default=False)
-    
     
     def add(attendanceID, questionID, answer):
         try:

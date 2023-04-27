@@ -50,13 +50,23 @@ def extractEmotions(videoPath,tempPath, interval=5):
             break
         faceDetector = cv2.CascadeClassifier(str(XML_ROOT)+'/haarcascade_frontalface_default.xml')
         grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # histogram equalization on greyScale image
+        grayFrame = cv2.equalizeHist(grayFrame)
+        #contrast enhancement using(CLAHE)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        grayFrame = clahe.apply(grayFrame)
+        # median blur to reduce noise
+        grayFrame = cv2.medianBlur(grayFrame, 5)
         # detect faces available on camera
         numFaces = faceDetector.detectMultiScale(grayFrame, scaleFactor=1.3, minNeighbors=5)
-        cv2.imwrite(tempPath, frame)
+        cv2.imwrite(tempPath, grayFrame)
         if len(numFaces) != 0:
-            # Increment the counter for frames with detected faces
-            total_frames_with_faces += 1
+            
             if frame_counter % interval == 0:
+                # Increment the counter for frames with detected faces
+                total_frames_with_faces += 1
+                # Resize the image to a smaller size for faster computation
+                small_frame = cv2.resize(grayFrame, (0, 0), fx=0.5, fy=0.5)
                 emotionPrediction = DeepFace.analyze(img_path=tempPath, actions=['emotion'], enforce_detection=False)
                 dominant_emotion = emotionPrediction[0]['dominant_emotion']
                 # Increment the counter for the detected emotion
@@ -67,7 +77,7 @@ def extractEmotions(videoPath,tempPath, interval=5):
     cap.release()
     cv2.destroyAllWindows()
     # Calculate the percentage of frames for each emotion based on frames with detected faces
-    emotion_percentages = {emotion: count / frame_counter for emotion, count in emotion_counts.items()}
+    emotion_percentages = {emotion: count / total_frames_with_faces for emotion, count in emotion_counts.items()}
     return emotion_percentages
 
 

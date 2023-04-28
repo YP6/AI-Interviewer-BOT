@@ -12,8 +12,8 @@ from ..permissions import *
 
 def IsAuthenticated(view_function):
     def decorated_function(request, *args, **kwargs):
-        print(request.user.is_authenticated)
-        print(request.COOKIES)
+        #print(request.user.is_authenticated)
+        #print(request.COOKIES)
         if not request.user.is_authenticated:
             return Response({'Error 400': 'Bad Request',
             "detail" : "Login Required."},

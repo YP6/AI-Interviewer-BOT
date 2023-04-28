@@ -378,7 +378,7 @@ def GetNextQuestion(request):
     nextQuestion = Question.objects.get(question=question.questionID)
 
     response = Response({"question": nextQuestion.question,
-                     "topic": nextQuestion.topic}, status=status.HTTP_200_OK)
+                     "topic": nextQuestion.topic, "duration": nextQuestion.duration}, status=status.HTTP_200_OK)
     
     response.set_cookie(key="questionID", value=nextQuestion.id, secure=True, httponly=True)
     return response
@@ -454,7 +454,7 @@ def GetAttendedInterviewees(request):
         data.append(temp)
     return Response(data, status=status.HTTP_200_OK)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @IsAuthenticated
 def GetUserReport(request):
     try:

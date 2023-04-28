@@ -9,15 +9,15 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .serializers import *
 from ..models import yp6AuthenticationToken
-from ..AUTH import CheckAuthorization, Hash, RemoveAuthorization
+from ..AUTH import Hash, RemoveAuthorization
 from .decorators import *
 from django.apps import apps
 from Parrot.apps import ParrotConfig
 import os
 from django.conf import settings
 from ..bot_brain.TextPreprocessing import *
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-
+from django.views.decorators.csrf import csrf_exempt
+import ast
 
 @api_view(['POST'])
 @csrf_exempt
@@ -447,3 +447,93 @@ def GetAttendedInterviewees(request):
         temp['attendanceData'] = attendance.attendanceDate
         data.append(temp)
     return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@IsAuthenticated
+def GetUserReport(request):
+    try:
+        attendance = InterviewAttendance.objects.filter(id = request.data['attendanceID'])[0]
+        print(attendance)
+        results = InterviewResult.objects.filter(attendanceID=attendance)
+    except Exception as err:
+        return Response({"Error 400":"Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    responseData = []
+    for result in results:
+        # Question , Score , (Right Answer, Interviewee Answer)
+        #                   "Text", "Words Analysis", "Sentences Analysis"
+        #                   "Start Index" , "End Index" , "Color", "Label"
+        singleData = {}
+        singleData['Question'] = result.questionID.question
+        singleData['Score'] = result.grade
+        singleData['Emotion Analysis']= {
+            "angry" : result.angry,
+            "happy" : result.happy,
+            "disgust" : result.disgust,
+            "fear" : result.fear,
+            "neutral" : result.neutral,
+            "sad" : result.sad,
+            "surprise" : result.surprise
+        }
+        
+       
+        # Right Answer
+        rightWords = result.rightImportantWords
+        rightWords_list = ast.literal_eval(rightWords)
+        rightWordsAnalysis = []
+        for word in rightWords_list:
+            ret = {}
+            ret['Start Index'] = word[0]
+            ret['End Index'] = word[1]
+            ret['Color'] = "#00FFFF"
+            ret['Label'] = "Important Word"
+            rightWordsAnalysis.append(ret)
+
+        rightSentences = result.rightImportantSentences
+        rightSentences_list = ast.literal_eval(rightSentences)
+        rightSentencesAnalysis = []
+        for sentence in rightSentences_list:
+            ret = {}
+            ret['Start Index'] = sentence[0]
+            ret['End Index'] = sentence[1]
+            ret['Color'] = "#FFFF00"
+            ret['Label'] = "Important Sentences"
+            rightSentencesAnalysis.append(ret)
+
+        singleData['Right Answers'] = {
+            "Text": result.rightAnswer,
+            "Words Analysis" : rightWordsAnalysis,
+            "Sentences Analysis" : rightSentencesAnalysis
+        }
+
+        # Interviewee Answer
+        intervieweeWords = result.intervieweeImportantWords
+        intervieweeWords_list = ast.literal_eval(intervieweeWords)
+        intervieweeWordsAnalysis = []
+        for word in intervieweeWords_list:
+            ret = {}
+            ret['Start Index'] = word[0]
+            ret['End Index'] = word[1]
+            ret['Color'] = "#00FFFF"
+            ret['Label'] = "Important Word"
+            intervieweeWordsAnalysis.append(ret)
+
+        intervieweeSentences = result.intervieweeImportantSentences
+        intervieweeSentences_list = ast.literal_eval(intervieweeSentences)
+        intervieweeSentencesAnalysis = []
+        for sentence in intervieweeSentences_list:
+            ret = {}
+            ret['Start Index'] = sentence[0]
+            ret['End Index'] = sentence[1]
+            ret['Color'] = "#FFFF00"
+            ret['Label'] = "Important Sentences"
+            intervieweeSentencesAnalysis.append(ret)
+
+        singleData['Interviewee Answers'] = {
+            "Text": result.answer,
+            "Words Analysis" : intervieweeWordsAnalysis,
+            "Sentences Analysis" : intervieweeSentencesAnalysis
+        }
+        responseData.append(singleData)
+
+    return Response(responseData, status=200)

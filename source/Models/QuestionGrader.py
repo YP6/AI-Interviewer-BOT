@@ -113,8 +113,10 @@ def QuestionGrader():
                 session.botResponse = botResponse
                 session.save()
                 
-                InterviewResult.add(attendanceID=session.attendanceID, questionID=session.questionID, answer=session.answer,
-                                                videoPath=session.videoPath, grade=grade, importantWords=str(bestGrade.ExtractImportantWords()[1]), importantSentences=str(bestGrade.ExtractImportantSentences()[1]))
+                InterviewResult.add(attendanceID=session.attendanceID, questionID=session.questionID, rightAnswer=bestGrade.texts[1], answer=session.answer,
+                                                videoPath=session.videoPath, grade=grade,
+                                                rightImportantWords=str(bestGrade.ExtractImportantWords()[0]), rightImportantSentences=str(bestGrade.ExtractImportantSentences()[0]) ,
+                                                intervieweeImportantWords=str(bestGrade.ExtractImportantWords()[1]), intervieweeImportantSentences=str(bestGrade.ExtractImportantSentences()[1]))
 
                 
             except Exception as err:

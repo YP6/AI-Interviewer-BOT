@@ -258,11 +258,14 @@ class yp6AuthenticationToken(models.Model):
 class InterviewResult(models.Model):
     attendanceID = models.ForeignKey(InterviewAttendance, on_delete=models.CASCADE)
     questionID = models.ForeignKey(Question, on_delete=models.CASCADE)
+    rightAnswer = models.CharField(max_length=255, null=True)
     answer = models.CharField(max_length=255, null=True)
     videoPath = models.TextField(default="")
     grade = models.FloatField(default=0)
-    importantWords = models.TextField(null=True)
-    importantSentences = models.TextField(null=True)
+    rightImportantWords = models.TextField(null=True)
+    rightImportantSentences = models.TextField(null=True)
+    intervieweeImportantWords = models.TextField(null=True)
+    intervieweeImportantSentences = models.TextField(null=True)
     angry = models.FloatField(null=False, default=0)
     happy = models.FloatField(null=False, default=0)
     disgust = models.FloatField(null=False, default=0)
@@ -273,11 +276,12 @@ class InterviewResult(models.Model):
     status = models.CharField(max_length=6, default='Failed')
     analysed = models.BooleanField(null=False, default=False)
 
-    def add(attendanceID, questionID, answer, videoPath, grade, importantWords, importantSentences, 
+    def add(attendanceID, questionID, rightAnswer, answer, videoPath, grade, rightImportantWords, rightImportantSentences, intervieweeImportantWords, intervieweeImportantSentences,
             angry=0, happy=0, disgust=0, fear=0, neutral=0, sad=0, surprise=0, analysed=False):
         try:
-            interviewResult = InterviewResult(attendanceID=attendanceID, questionID=questionID, answer=answer, videoPath=videoPath,
-                                            grade=grade, importantWords=importantWords, importantSentences=importantSentences, 
+            interviewResult = InterviewResult(attendanceID=attendanceID, questionID=questionID, rightAnswer=rightAnswer, answer=answer, videoPath=videoPath,
+                                            grade=grade, rightImportantWords=rightImportantWords, rightImportantSentences=rightImportantSentences,
+                                            intervieweeImportantWords=intervieweeImportantWords, intervieweeImportantSentences=intervieweeImportantSentences, 
                                             angry = angry, happy=happy, disgust=disgust, fear=fear, neutral=neutral, sad=sad,
                                             surprise=surprise, status=("Failed" if grade < 50 else "Pass"), analysed=analysed)
             interviewResult.save()

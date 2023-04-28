@@ -26,7 +26,9 @@ urlpatterns = [
     path('interview/getAnswerResponse/', GetAnswerResponse, name='get-answer-response'),
     path('interview/getCreatedInterviews/', GetCreatedInterviews, name='get-created-interviews'),
     path('interview/getAttendedInterviewees/', GetAttendedInterviewees, name='get-attended-interviewees'),
-        
+
+    path('report/getUserReport', GetUserReport, name="get-user-report"),
+
     path('question/add/', AddQuestion, name='add-question'),
     path('question/edit/', EditQuestion, name='edit-question'),
     

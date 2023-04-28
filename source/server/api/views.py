@@ -239,7 +239,7 @@ def AddInterview(request):
             try:
                 if 'answers' in q.keys():
                     question = Question.add(question=q['question'], topic=q['topic'], type=q['type'],
-                                            level=q['level'], visibility=q['visibility'], userID=request.user.username)
+                                            duration=q['level'], visibility=q['visibility'], userID=request.user.username)
                     if not question == None:
                         InterviewQuestion.add(interview, question)
                         answer = QuestionAnswers.add(question=question, answers=q['answers'])
@@ -445,6 +445,12 @@ def GetAttendedInterviewees(request):
         temp = user.data
         temp['attendanceID'] = attendance.id
         temp['attendanceData'] = attendance.attendanceDate
+        overallScore = 0
+        results = InterviewResult.objects.filter(attendanceID = attendance)
+        numOfQuestion = len(results)
+        for result in results:
+            overallScore += result.grade / numOfQuestion 
+        temp['score'] = overallScore
         data.append(temp)
     return Response(data, status=status.HTTP_200_OK)
 
@@ -457,8 +463,11 @@ def GetUserReport(request):
         results = InterviewResult.objects.filter(attendanceID=attendance)
     except Exception as err:
         return Response({"Error 400":"Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
-    
-    responseData = []
+    overallScore = 0
+    numOfQuestion = len(results)
+    for result in results:
+        overallScore += result.grade / numOfQuestion 
+    responseData = {"score": overallScore, "Questions": []}
     for result in results:
         # Question , Score , (Right Answer, Interviewee Answer)
         #                   "Text", "Words Analysis", "Sentences Analysis"
@@ -534,6 +543,6 @@ def GetUserReport(request):
             "Words Analysis" : intervieweeWordsAnalysis,
             "Sentences Analysis" : intervieweeSentencesAnalysis
         }
-        responseData.append(singleData)
+        responseData['Questions'].append(singleData)
 
     return Response(responseData, status=200)

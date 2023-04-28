@@ -264,16 +264,18 @@ class SentencePreprocessor:
       text = self.nlp(text)
       text = [t.lemma_.lower() for t in text]
       text = ' '.join(text)
-
+      lastIndex = -1
       for sen in self.sentences[j]:
         sen = sen.replace('+','\+')
         sp = sen.split(' ')
         if len(sp) <= 1:
           continue
         pattern = str(".*".join(sp))
-        m = re.search(pattern, text)
-        if m:
-          span.append((m.start(), m.end()))
+        if lastIndex < len(text):
+          m = re.search(pattern, text[lastIndex:])
+          if m:
+            lastIndex = m.end() + 1
+            span.append((m.start(), m.end()))
 
       spans.append(span)
     return spans

@@ -157,19 +157,19 @@ class Question(models.Model):
     question = models.CharField(max_length=150, unique=True)
     topic = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
-    level = models.CharField(max_length=15)
+    duration = models.FloatField(max_length=15, default=1)
     visibility = models.CharField(max_length=15)
     userID = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.question
 
-    def add(question, topic, type, level, visibility, userID):
+    def add(question, topic, type, duration, visibility, userID):
         if Question.objects.filter(question=question).exists():
             return None
         else:
             try:
-                question = Question(question=question, topic=topic, type=type, level=level, visibility=visibility,
+                question = Question(question=question, topic=topic, type=type, duration=duration, visibility=visibility,
                                     userID=User.objects.get(username=userID))
                 question.save()
             except Exception as err:

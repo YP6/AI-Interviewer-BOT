@@ -463,11 +463,8 @@ def GetUserReport(request):
         results = InterviewResult.objects.filter(attendanceID=attendance)
     except Exception as err:
         return Response({"Error 400":"Bad Request", "detail":str(err)}, status=status.HTTP_400_BAD_REQUEST)
-    overallScore = 0
-    numOfQuestion = len(results)
-    for result in results:
-        overallScore += result.grade / numOfQuestion 
-    responseData = {"score": overallScore, "Questions": []}
+    
+    responseData = []
     for result in results:
         # Question , Score , (Right Answer, Interviewee Answer)
         #                   "Text", "Words Analysis", "Sentences Analysis"
@@ -543,6 +540,6 @@ def GetUserReport(request):
             "Words Analysis" : intervieweeWordsAnalysis,
             "Sentences Analysis" : intervieweeSentencesAnalysis
         }
-        responseData['Questions'].append(singleData)
+        responseData.append(singleData)
 
     return Response(responseData, status=200)

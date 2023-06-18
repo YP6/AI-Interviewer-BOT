@@ -30,6 +30,7 @@ def LoginUser(request):
         login(request, user)
         res = Response({'OK 200' : 'Sucess', 'detail':'Authorized'}, status= status.HTTP_200_OK)
         res.set_cookie('accountType', str(request.user.accountType), secure=True)
+        res.set_cookie('username', str(request.user.username), secure=True)
         return res
     else:
         return Response({'Error 400': 'Bad Request', 'detatil': 'Wrong Credentials'},
@@ -118,7 +119,10 @@ def GetAppointemnts(request):
     
     for interview in privateInterviews:
         details = Interview.objects.get(title=interview.interviewID)
-        response.append(InterviewSerializer(details).data)
+        data = InterviewSerializer(details).data
+        
+        data['topic'] = Topic.objects.get(id= details.topic.id).topicName
+        response.append(data)
     
     return Response(response,status=status.HTTP_200_OK)
 
@@ -147,7 +151,7 @@ def CurrentProfile(request):
 @api_view(['GET'])
 @IsAuthenticated
 def GetInterviews(request):
-    interviews = Interview.objects.all()
+    interviews = Interview.objects.filter(isPrivate=False)
     serializedData = InterviewSerializer(interviews, many=True)
     for i in range(len(serializedData.data)):
         topicID = serializedData.data[i]['topic']
@@ -485,6 +489,7 @@ def GetUserReport(request):
        
         # Right Answer
         rightWords = result.rightImportantWords
+        print(rightWords)
         rightWords_list = ast.literal_eval(rightWords)
         rightWordsAnalysis = []
         for word in rightWords_list:

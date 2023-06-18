@@ -28,7 +28,10 @@ def answerExtraction():
                     # Extracing answer text from the video.
                     audioPath = toMP3(interview) 
                     result = model.transcribe(audioPath, language='en', fp16=False)
-                    interview.answer = result['text']
+                    res= result['text']
+                    if res[0] == ' ':
+                        res = res[1:]
+                    interview.answer = res
                     interview.processed = True
                     interview.save()
                     

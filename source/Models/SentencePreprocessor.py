@@ -264,7 +264,7 @@ class SentencePreprocessor:
       text = self.nlp(text)
       text = [t.lemma_.lower() for t in text]
       text = ' '.join(text)
-      lastIndex = -1
+      lastIndex = 0
       for sen in self.sentences[j]:
         sen = sen.replace('+','\+')
         sp = sen.split(' ')

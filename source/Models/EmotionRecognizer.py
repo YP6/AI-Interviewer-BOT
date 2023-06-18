@@ -66,7 +66,7 @@ def extractEmotions(videoPath,tempPath, interval=5):
     cap.release()
     cv2.destroyAllWindows()
     # Calculate the percentage of frames for each emotion based on frames with detected faces
-    emotion_percentages = {emotion: count / total_frames_with_faces for emotion, count in emotion_counts.items()}
+    emotion_percentages = {emotion: count / (total_frames_with_faces+0.01) for emotion, count in emotion_counts.items()}
     return emotion_percentages
 
 def EmotionRecognizer():
@@ -77,7 +77,7 @@ def EmotionRecognizer():
         for answer in answers:
             try:
                 # Extracting emotions from the video.
-                emotions = extractEmotions(str(answer.videoPath), str(MEDIA_ROOT)+'/tempImage'+str(answer.id)+'.jpg', interval=30)
+                emotions = extractEmotions(str(answer.videoPath), str(MEDIA_ROOT)+'/tempImage'+str(answer.id)+'.jpg', interval=10)
                 if emotions:
                     answer.angry = emotions['angry']
                     answer.happy = emotions['happy']

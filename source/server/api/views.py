@@ -50,7 +50,7 @@ def LogoutUser(request):
 
 
 @api_view(['GET'])
-@login_required
+@login_required(redirect_field_name=None)
 def OptainAuthToken(request):
     try:
         token = yp6AuthenticationToken()
